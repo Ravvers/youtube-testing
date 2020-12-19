@@ -1,5 +1,5 @@
 const puppeteer = require('puppeteer')
-
+//Test main Functions
 //Log into Youtube; Test Case 1
 const logInToYouTube = async (userCredentials) => {
     const webDriverParts = await startBrowser()
@@ -7,8 +7,23 @@ const logInToYouTube = async (userCredentials) => {
     await goToSignIn(page)
     await fillEmail(page, userCredentials)
     await fillPassword(page, userCredentials)
-    const userLogin = await confirmLogIn(page)
-    return {webDriverParts, userLogin}
+    const username = await confirmLogIn(page)
+    return {webDriverParts, username}
+}
+
+//Check channel featured in subscriptions is subscribed to; Test Case 2
+const subscribedTo = async () => {
+    const params = logInToYouTube({
+        email: 'raveenautotest@gmail.com',
+        password: 'testpassword123'
+    })
+    const page = (await params).webDriverParts.page
+    await page.goto('https://youtube.com')
+    await goToSubscriptions(page)
+    await goToChannel(page)
+    const subscribeText = await getSubscribeText(page)
+    const close = (await params).webDriverParts.browser.close()
+    return subscribeText
 }
 
 //Functions
@@ -55,7 +70,29 @@ async function confirmLogIn(page) {
     return userEmail
 }
 
+async function goToSubscriptions(page) {
+    await page.evaluate(() => {
+        document.querySelector("[title='Subscriptions']").click()
+    })
+    await page.waitForTimeout(5000)
+}
+
+async function goToChannel(page) {
+    await page.evaluate(() => {
+        document.getElementsByTagName('ytd-grid-renderer')[0].querySelector('#metadata').getElementsByTagName('a')[0].click()
+    })
+    await page.waitForTimeout(5000)
+}
+
+async function getSubscribeText(page) {
+    const subscribeText = await page.evaluate(() => {
+        return document.querySelector('#inner-header-container').getElementsByTagName('paper-button')[0].getElementsByClassName('ytd-subscribe-button-renderer')[0].textContent
+    })
+    return subscribeText
+}
+
 //Export
 module.exports = {
-    logInToYouTube
+    logInToYouTube,
+    subscribedTo
 }
