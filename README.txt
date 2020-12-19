@@ -1,0 +1,2 @@
+This project aims to test some brief functionality of YouTube.
+You can find my planning for test cases here: https://docs.google.com/spreadsheets/d/1AfN4fDBoZsqmJXjUoseajlVm29Wr3-IpVeq4mC7UgFY/edit?usp=sharing
