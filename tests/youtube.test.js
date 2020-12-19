@@ -2,7 +2,7 @@ const automateYoutubeFunctionality = require('../automateYoutubeFunctionality')
 
 describe('Testing YouTube functionality', () => {
     beforeEach(() => {
-        jest.setTimeout(50000)
+        jest.setTimeout(70000)
     })
 
     test('Log into Youtube', () => {
@@ -29,7 +29,10 @@ describe('Testing YouTube functionality', () => {
         })
     })
 
-    test.skip('Ensure that viewing a video shows in History', () => {
-
+    test('Ensure that viewing a video shows in History', () => {
+        return automateYoutubeFunctionality.isShownInHistory()
+        .then((videoTitles) => {
+            expect(videoTitles.videoTitle).toBe(videoTitles.videoTitleFromHistory)
+        })
     })
 })

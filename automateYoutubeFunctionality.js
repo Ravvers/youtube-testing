@@ -42,6 +42,23 @@ const isInWatchLater = async () => {
     return inWatchLater
 }
 
+//Ensure that viewing a video shows in History; Test Case 4
+const isShownInHistory = async () => {
+    const params = logInToYouTube({
+        email: 'raveenautotest@gmail.com',
+        password: 'testpassword123'
+    })
+    const page = (await params).webDriverParts.page
+    await page.goto('https://youtube.com')
+    await goToTrending(page)
+    const videoTitle = await openFirstVideo(page)
+    await goToHome(page)
+    await goToHistory(page)
+    const videoTitleFromHistory = await searchHistory(page)
+    const close = (await params).webDriverParts.browser.close()
+    return { videoTitle, videoTitleFromHistory }
+}
+
 //Functions
 async function startBrowser() {
     const browser = await puppeteer.launch({ headless: false, args: ['--start-maximized'] })
@@ -145,9 +162,47 @@ async function searchWatchLater(page, videoTitle) {
     return inWatchLater
 }
 
+async function openFirstVideo(page) {
+    const videoTitle = await page.evaluate(() => {
+        const videoTitle = document.getElementById('grid-container').querySelector('#video-title').getAttribute('title')
+        document.getElementById('grid-container').querySelector('#video-title').click()
+        return videoTitle
+    })
+    await page.waitForTimeout(15000)
+    await page.evaluate(() => {
+        if(document.getElementsByClassName('ytp-ad-skip-button ytp-button')[0]) {
+        document.getElementsByClassName('ytp-ad-skip-button ytp-button')[0].click()
+        }
+    })
+    await page.waitForTimeout(10000)
+    return videoTitle
+}
+
+async function goToHome(page) {
+    await page.evaluate(() => {
+        document.querySelector('[title="YouTube Home"]').click()
+    })
+    page.waitForNavigation()
+}
+
+async function goToHistory(page) {
+    await page.evaluate(() => {
+        document.querySelector('[title="History"]').click()
+    })
+    await page.waitForTimeout(5000)   
+}
+
+async function searchHistory(page) {
+    const videoTitle = await page.evaluate(() => {
+        return document.querySelector('[page-subtype="history"]').querySelector('#video-title').getAttribute('title')
+    })
+    return videoTitle
+}
+
 //Export
 module.exports = {
     logInToYouTube,
     isSubscribedTo,
-    isInWatchLater
+    isInWatchLater,
+    isShownInHistory
 }
