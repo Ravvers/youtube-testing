@@ -12,7 +12,7 @@ const logInToYouTube = async (userCredentials) => {
 }
 
 //Check channel featured in subscriptions is subscribed to; Test Case 2
-const subscribedTo = async () => {
+const isSubscribedTo = async () => {
     const params = logInToYouTube({
         email: 'raveenautotest@gmail.com',
         password: 'testpassword123'
@@ -24,6 +24,22 @@ const subscribedTo = async () => {
     const subscribeText = await getSubscribeText(page)
     const close = (await params).webDriverParts.browser.close()
     return subscribeText
+}
+
+//Check that a video is in the watch later section if added to watch later; Test Case 3
+const isInWatchLater = async () => {
+    const params = logInToYouTube({
+        email: 'raveenautotest@gmail.com',
+        password: 'testpassword123'
+    })
+    const page = (await params).webDriverParts.page
+    await page.goto('https://youtube.com')
+    await goToTrending(page)
+    const videoTitle = await addToWatchLater(page)
+    await goToWatchLater(page)
+    const inWatchLater = await searchWatchLater(page, videoTitle)
+    const close = (await params).webDriverParts.browser.close()
+    return inWatchLater
 }
 
 //Functions
@@ -91,8 +107,47 @@ async function getSubscribeText(page) {
     return subscribeText
 }
 
+async function goToTrending(page) {
+    await page.evaluate(() => {
+        document.querySelector("[title='Trending']").click()
+    })
+    await page.waitForTimeout(5000)   
+}
+
+async function addToWatchLater(page) {
+    await page.evaluate(() => {
+        document.getElementById('grid-container').querySelector('#menu').querySelector('#button').getElementsByTagName('yt-icon')[0].click()
+    })
+    await page.waitForTimeout(5000)
+    const videoTitle = await page.evaluate(async () => {
+        document.getElementsByTagName('ytd-menu-popup-renderer')[0].getElementsByTagName('ytd-menu-service-item-renderer')[1].click()
+        return document.getElementById('grid-container').querySelector('#video-title').getAttribute('title')
+    })
+    return videoTitle
+}
+
+async function goToWatchLater(page) {
+    await page.evaluate(() => {
+        document.querySelector('[title="Watch later"]').click()
+    })
+    await page.waitForTimeout(5000)  
+}
+
+async function searchWatchLater(page, videoTitle) {
+    const inWatchLater = await page.evaluate((videoTitle) => {
+        if (document.querySelector('[title="' + videoTitle + '"]') !== null) {
+            return true
+        }
+        else {
+            return false
+        }
+    }, videoTitle)
+    return inWatchLater
+}
+
 //Export
 module.exports = {
     logInToYouTube,
-    subscribedTo
+    isSubscribedTo,
+    isInWatchLater
 }

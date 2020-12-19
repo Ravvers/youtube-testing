@@ -16,14 +16,17 @@ describe('Testing YouTube functionality', () => {
     })
 
     test('Check channel featured in subscriptions is subscribed to', () => {
-        return automateYoutubeFunctionality.subscribedTo()
+        return automateYoutubeFunctionality.isSubscribedTo()
         .then((subscribeText) => {
             expect(subscribeText).toBe('Subscribed')
         })
     })
 
-    test.skip('Check that a video is in the watch later section if added to watch later', () => {
-
+    test('Check that a video is in the watch later section if added to watch later', () => {
+        return automateYoutubeFunctionality.isInWatchLater()
+        .then((isInWatchLater) => {
+            expect(isInWatchLater).toBe(true)
+        })
     })
 
     test.skip('Ensure that viewing a video shows in History', () => {
